@@ -41,6 +41,14 @@ import "@fontsource/press-start-2p";
 import "@fontsource/black-ops-one";
 import "./stbar.css";
 import { createFsTools, getWorkspaceName, hasWorkspace, pickWorkspaceFolder } from "./fs-tools.js";
+import {
+	createTauriTools,
+	getTauriWorkspaceName,
+	hasTauriWorkspace,
+	initTauriWorkspace,
+	isTauri,
+	pickTauriFolder,
+} from "./tauri-tools.js";
 
 // ============================================================
 // STORAGE
@@ -335,7 +343,8 @@ When the user asks about their files, their project, or "this folder", DO NOT sa
 		toolsFactory: (_agent, _agentInterface, _artifactsPanel, runtimeProvidersFactory) => {
 			const replTool = createJavaScriptReplTool();
 			replTool.runtimeProvidersFactory = runtimeProvidersFactory;
-			return [replTool, ...createFsTools()];
+			const fileTools = isTauri() ? createTauriTools() : createFsTools();
+			return [replTool, ...fileTools];
 		},
 	});
 };
@@ -414,9 +423,14 @@ const headerTemplate = () => html`
 			size: "sm",
 			children: icon(FolderOpen, "sm"),
 			onClick: async () => {
-				if (await pickWorkspaceFolder()) renderHeader();
+				const picked = isTauri() ? await pickTauriFolder() : await pickWorkspaceFolder();
+				if (picked) renderHeader();
 			},
-			title: hasWorkspace() ? `Workspace: ${getWorkspaceName()}` : "Open Folder (grant file access)",
+			title: (isTauri() ? hasTauriWorkspace() : hasWorkspace())
+				? `Workspace: ${isTauri() ? getTauriWorkspaceName() : getWorkspaceName()}`
+				: isTauri()
+					? "Open Folder (set working directory)"
+					: "Open Folder (grant file access)",
 		})}
 		${Button({
 			variant: "ghost",
@@ -746,6 +760,8 @@ const enhanceCopyButtons = () => {
 async function initApp() {
 	const app = document.getElementById("app");
 	if (!app) throw new Error("App container not found");
+
+	await initTauriWorkspace();
 
 	await runBootSequence();
 

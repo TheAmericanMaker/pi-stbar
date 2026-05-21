@@ -1,0 +1,15 @@
+{
+	"name": "pi-stbar-desktop",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"description": "Desktop face of pi-stbar — the STBAR-skinned pi-web-ui agent wrapped in Tauri for native filesystem + shell parity with terminal pi.",
+	"scripts": {
+		"dev": "tauri dev",
+		"build": "tauri build",
+		"tauri": "tauri"
+	},
+	"devDependencies": {
+		"@tauri-apps/cli": "^2.1.0"
+	}
+}

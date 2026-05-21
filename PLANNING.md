@@ -5,8 +5,9 @@ a terminal extension and a web app skinned with `doom.css`.
 
 ## In Progress
 
-- **Phase 3b — Web face** (`web/`): pi-web-ui ChatPanel skinned with STBAR CSS.
-  Scaffold + core wiring done; visual skin polish ongoing.
+- Wrap-up tasks for the desktop face: commit + push, then publish chores
+  (npm publish, GitHub Release with the demo MP4, delete the old
+  `pi-mono/packages/stbar` copy).
 
 ## Completed
 
@@ -32,6 +33,9 @@ a terminal extension and a web app skinned with `doom.css`.
 - Brave guidance pinned to the exact flag (brave://flags/#file-system-access-api) in web README + in-app message — 2026-05-20
 - Custom-provider key auto-resolve: onApiKeyRequired mirrors a saved Ollama/custom key into providerKeys instead of re-prompting — 2026-05-20
 - Action-first system prompt: agent now calls ls/read proactively instead of deflecting ("I can't access files"); confirmed working on Ollama models — 2026-05-20
+- Web face DONE; migrated out of pi-mono to the standalone repo (TheAmericanMaker/pi-stbar, MIT, npm `pi-stbar`); deps rewired file:→published npm versions — 2026-05-20
+- Phase 3d desktop scaffold — Tauri v2 (`desktop/`): native Rust commands in `src-tauri/src/lib.rs` (ls/read/write/edit + a real `bash` shell + pick_dir/default_dir); typed frontend bridge `web/src/tauri-tools.ts`; `web/src/main.ts` swaps to native tools when `isTauri()`; one frontend (Tauri points at `../web`); placeholder STBAR icons (π on a beveled panel); `tsc --noEmit` clean except the expected pre-install `@tauri-apps/api` module-resolution error — 2026-05-20
+- **Phase 3d desktop face CONFIRMED WORKING on James's machine** — `tauri dev` builds and runs; native FS + real `bash` shell live; web face unaffected (Vite clean on 5173) — 2026-05-20
 
 ## Backlog
 

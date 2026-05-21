@@ -1,0 +1,45 @@
+{
+	"$schema": "https://schema.tauri.app/config/2",
+	"productName": "pi-stbar",
+	"version": "0.1.0",
+	"identifier": "works.earendil.pi-stbar",
+	"build": {
+		"frontendDist": "../../web/dist",
+		"devUrl": "http://localhost:5173",
+		"beforeDevCommand": "npm --prefix ../web run dev",
+		"beforeBuildCommand": "npm --prefix ../web run build"
+	},
+	"app": {
+		"windows": [
+			{
+				"label": "main",
+				"title": "pi · STBAR",
+				"width": 1100,
+				"height": 760,
+				"minWidth": 720,
+				"minHeight": 480,
+				"resizable": true,
+				"fullscreen": false,
+				"theme": "Dark",
+				"backgroundColor": "#0a0a0a"
+			}
+		],
+		"security": {
+			"csp": null
+		}
+	},
+	"bundle": {
+		"active": true,
+		"targets": "all",
+		"category": "DeveloperTool",
+		"shortDescription": "STBAR-skinned pi agent (DOOM 1993-inspired) with native FS + shell.",
+		"longDescription": "pi-stbar desktop is the STBAR-skinned pi-web-ui coding agent wrapped in Tauri, giving the browser face full native filesystem and shell parity with terminal pi.",
+		"icon": [
+			"icons/32x32.png",
+			"icons/128x128.png",
+			"icons/128x128@2x.png",
+			"icons/icon.ico",
+			"icons/icon.png"
+		]
+	}
+}
