@@ -1,0 +1,12 @@
+node_modules/
+dist/
+*.log
+*.tsbuildinfo
+.vite/
+.DS_Store
+Thumbs.db
+*.bak
+
+# Demo media — keep committed assets small; raw recordings stay local / go to Releases
+*.mp4
+media/Screenshot*.png

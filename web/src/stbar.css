@@ -1,0 +1,638 @@
+/* ============================================================
+   pi-stbar — STBAR (DOOM 1993-inspired) skin for pi-web-ui
+
+   Strategy:
+   1. Import pi-web-ui's bundled CSS to get Tailwind utilities
+      + mini-lit's default theme variables.
+   2. Redefine the theme variables (--color-background, --color-foreground,
+      etc.) to STBAR's palette so every pi-web-ui component automatically
+      re-skins without needing per-component overrides.
+   3. Layer STBAR-specific decoration: scanlines, vignette, beveled
+      panels, monospaced type, sharp corners always.
+   4. Override the components that have their own non-token styling
+      (.user-message-container has a hardcoded orange gradient).
+
+   The palette here mirrors packages/stbar/stbar.json — same source of
+   truth as the terminal extension. Keep them synchronized.
+   ============================================================ */
+
+@import "@earendil-works/pi-web-ui/app.css";
+
+/* ============================================================
+   1. STBAR DESIGN TOKENS
+   These names mirror stbar.json's "vars" block.
+   ============================================================ */
+:root {
+	/* Surface */
+	--stbar-void:         #0a0a0a;
+	--stbar-stone:        #1a1715;
+	--stbar-iron:         #2a2522;
+	--stbar-grate:        #15110e;
+
+	/* HUD plate */
+	--stbar-panel:        #4a3a2a;
+	--stbar-panel-light:  #7a5e3c;
+	--stbar-panel-dark:   #251a10;
+	--stbar-panel-deep:   #38291c;
+
+	/* Signal */
+	--stbar-blood:        #b51d0e;
+	--stbar-blood-bright: #e8341a;
+	--stbar-blood-dark:   #6b0d05;
+	--stbar-hellfire:     #f96e1f;
+	--stbar-flare:        #ffb347;
+	--stbar-marine:       #36a330;
+	--stbar-marine-dark:  #1f6919;
+	--stbar-armor:        #1e5fb8;
+	--stbar-key:          #f0c20c;
+	--stbar-toxic:        #7ad932;
+
+	/* Type */
+	--stbar-bone:         #e8dcc4;
+	--stbar-bone-dim:     #b8a886;
+	--stbar-ash:          #6e655a;
+
+	/* Bevel weights */
+	--stbar-bevel-1: 2px;
+	--stbar-bevel-2: 4px;
+	--stbar-bevel-3: 6px;
+
+	/* Fonts (loaded by the browser; user installs these or we serve them from fonts/) */
+	--stbar-font-body:    'IBM Plex Mono', 'Courier New', ui-monospace, monospace;
+	--stbar-font-hud:     'Press Start 2P', 'VT323', ui-monospace, monospace;
+	--stbar-font-ui:      'VT323', 'IBM Plex Mono', ui-monospace, monospace;
+	--stbar-font-display: 'AmazDooMLeft', 'Black Ops One', 'Rubik Mono One', Impact, sans-serif;
+
+	/* ============================================================
+	   2. RE-MAP mini-lit/pi-web-ui THEME VARIABLES TO STBAR
+	   pi-web-ui's components style themselves via these variables.
+	   Redefining them re-skins the whole UI without per-component work.
+	   ============================================================ */
+	--color-background:        var(--stbar-void);
+	--color-foreground:        var(--stbar-bone);
+	--color-card:              var(--stbar-iron);
+	--color-card-foreground:   var(--stbar-bone);
+	--color-popover:           var(--stbar-stone);
+	--color-popover-foreground: var(--stbar-bone);
+	--color-primary:           var(--stbar-hellfire);
+	--color-primary-foreground: var(--stbar-void);
+	--color-secondary:         var(--stbar-panel);
+	--color-secondary-foreground: var(--stbar-bone);
+	--color-muted:             var(--stbar-stone);
+	--color-muted-foreground:  var(--stbar-bone-dim);
+	--color-accent:            var(--stbar-blood);
+	--color-accent-foreground: var(--stbar-bone);
+	--color-destructive:       var(--stbar-blood-bright);
+	--color-destructive-foreground: var(--stbar-bone);
+	--color-border:            var(--stbar-panel-dark);
+	--color-input:             var(--stbar-grate);
+	--color-ring:              var(--stbar-hellfire);
+
+	/* Tailwind v4 also reads these directly in component classes */
+	--radius: 0px; /* RULE #1 — no rounded corners. anywhere. ever. */
+}
+
+/* ============================================================
+   3. BODY DECORATION — scanlines + vignette + dark stone texture
+   Mirrors .doom-scanlines + .doom-vignette from doom.css.
+   ============================================================ */
+html, body {
+	margin: 0;
+	padding: 0;
+	background: var(--stbar-void);
+	color: var(--stbar-bone);
+	font-family: var(--stbar-font-body);
+	-webkit-font-smoothing: none;
+	font-smooth: never;
+	background-image:
+		radial-gradient(circle at 20% 30%, #1a1614 0 1px, transparent 2px),
+		radial-gradient(circle at 70% 80%, #161210 0 1px, transparent 2px),
+		radial-gradient(circle at 50% 50%, #0d0a08 0 1px, transparent 2px),
+		linear-gradient(180deg, #0a0a0a 0%, #120e0c 100%);
+	background-size: 7px 7px, 11px 11px, 5px 5px, 100% 100%;
+	min-height: 100vh;
+}
+
+/* Scanlines overlay — applied via body class in index.html */
+.stbar-scanlines::after {
+	content: '';
+	position: fixed;
+	inset: 0;
+	background: repeating-linear-gradient(
+		to bottom,
+		transparent 0,
+		transparent 2px,
+		rgba(0, 0, 0, 0.22) 2px,
+		rgba(0, 0, 0, 0.22) 3px
+	);
+	pointer-events: none;
+	z-index: 9998;
+	mix-blend-mode: multiply;
+}
+
+.stbar-vignette::before {
+	content: '';
+	position: fixed;
+	inset: 0;
+	background: radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.7) 100%);
+	pointer-events: none;
+	z-index: 9997;
+}
+
+::selection {
+	background: var(--stbar-blood);
+	color: var(--stbar-bone);
+}
+
+/* ============================================================
+   4. RULE #1 ENFORCEMENT — strip rounded corners everywhere
+   ============================================================ */
+*,
+*::before,
+*::after {
+	border-radius: 0 !important;
+}
+
+/* ============================================================
+   5. COMPONENT OVERRIDES
+   pi-web-ui has some components with hardcoded styling that
+   don't read from theme variables. Override them here.
+   ============================================================ */
+
+/* User messages — pi-web-ui ships a hardcoded orange gradient. Replace
+   with the brown beveled HUD plate look. */
+.user-message-container {
+	background: var(--stbar-panel-deep) !important;
+	border: 2px solid var(--stbar-panel-dark) !important;
+	backdrop-filter: none !important;
+	box-shadow:
+		inset var(--stbar-bevel-2) var(--stbar-bevel-2) 0 0 var(--stbar-panel-light),
+		inset calc(-1 * var(--stbar-bevel-2)) calc(-1 * var(--stbar-bevel-2)) 0 0 var(--stbar-panel-dark),
+		0 4px 0 #000 !important;
+	color: var(--stbar-bone) !important;
+	font-family: var(--stbar-font-body) !important;
+}
+
+/* Headings — TODO: AmazDooM display face for h1/h2 once fonts are bundled */
+h1, .h1 {
+	font-family: var(--stbar-font-display);
+	color: var(--stbar-blood);
+	text-shadow: 0 3px 0 var(--stbar-blood-dark), 0 6px 12px #000;
+	letter-spacing: 0.04em;
+}
+
+h2, .h2 {
+	font-family: var(--stbar-font-display);
+	color: var(--stbar-hellfire);
+	text-shadow: 0 2px 0 #4a1f08, 0 4px 8px #000;
+	letter-spacing: 0.04em;
+}
+
+/* Inline code — toxic-green console feel */
+code {
+	background: var(--stbar-grate);
+	color: var(--stbar-toxic);
+	padding: 2px 6px;
+	border: 1px solid var(--stbar-panel-dark);
+	font-family: var(--stbar-font-body);
+}
+
+/* Code blocks — pre with chiseled left border like a blood drip */
+pre {
+	background: var(--stbar-grate);
+	color: var(--stbar-toxic);
+	border: 2px solid var(--stbar-panel-dark);
+	border-left: 4px solid var(--stbar-blood);
+	padding: 16px;
+	font-family: var(--stbar-font-body);
+}
+
+/* Links — hellfire with dotted underline */
+a {
+	color: var(--stbar-hellfire);
+	text-decoration: none;
+	border-bottom: 1px dotted var(--stbar-hellfire);
+}
+a:hover {
+	color: var(--stbar-blood-bright);
+	text-shadow: 0 0 8px var(--stbar-blood), 0 0 18px var(--stbar-blood-dark);
+}
+
+/* ============================================================
+   6. SCROLLBARS — panel-brown thumb on grate track
+   ============================================================ */
+* {
+	scrollbar-width: thin;
+	scrollbar-color: var(--stbar-panel-light) var(--stbar-grate);
+}
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: var(--stbar-grate); }
+*::-webkit-scrollbar-thumb {
+	background: var(--stbar-panel);
+	border: 1px solid var(--stbar-panel-dark);
+	box-shadow: inset 2px 2px 0 0 var(--stbar-panel-light), inset -2px -2px 0 0 var(--stbar-panel-dark);
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--stbar-panel-light); }
+
+/* ============================================================
+   7. PANELS — STBAR bevels (highlight TL, shadow BR; inverted = pressed-in)
+   ============================================================ */
+user-message .user-message-container {
+	background: var(--stbar-panel-deep) !important;
+	border: 2px solid var(--stbar-panel-dark) !important;
+	backdrop-filter: none !important;
+	box-shadow:
+		inset var(--stbar-bevel-2) var(--stbar-bevel-2) 0 0 var(--stbar-panel-light),
+		inset calc(-1 * var(--stbar-bevel-2)) calc(-1 * var(--stbar-bevel-2)) 0 0 var(--stbar-panel-dark),
+		0 4px 0 #000 !important;
+	color: var(--stbar-bone) !important;
+	font-family: var(--stbar-font-body) !important;
+}
+assistant-message {
+	display: block;
+	border-left: 3px solid var(--stbar-hellfire);
+	padding-left: 10px;
+}
+tool-message > div,
+tool-message-debug > div {
+	background: linear-gradient(180deg, #3a3530 0%, #1f1c19 100%) !important;
+	border: 2px solid var(--stbar-panel-dark) !important;
+	box-shadow:
+		inset 3px 3px 0 0 #4a443c,
+		inset -3px -3px 0 0 var(--stbar-panel-dark) !important;
+	color: var(--stbar-bone) !important;
+}
+tool-message .bg-destructive\/10,
+tool-message-debug .bg-destructive\/10 {
+	background: linear-gradient(180deg, #2a0a05 0%, #18090c 100%) !important;
+	color: var(--stbar-blood-bright) !important;
+	border: 1px solid var(--stbar-blood-dark) !important;
+	box-shadow: inset 2px 2px 0 0 var(--stbar-blood), inset -2px -2px 0 0 #200505 !important;
+}
+thinking-block {
+	display: block;
+	background:
+		repeating-linear-gradient(0deg, #1f1a16 0 2px, transparent 2px 4px),
+		var(--stbar-stone);
+	border: 2px solid var(--stbar-panel-dark);
+	box-shadow:
+		inset 3px 3px 0 0 var(--stbar-panel-dark),
+		inset -3px -3px 0 0 var(--stbar-panel-light);
+	color: var(--stbar-bone-dim);
+}
+aborted-message,
+.text-destructive { color: var(--stbar-blood-bright) !important; }
+
+/* ============================================================
+   8. EDITOR — inset bevel field + beveled buttons
+   ============================================================ */
+message-editor {
+	display: block;
+	background: var(--stbar-grate);
+	border: 2px solid var(--stbar-panel-dark);
+	box-shadow:
+		inset 3px 3px 0 0 var(--stbar-panel-dark),
+		inset -3px -3px 0 0 var(--stbar-panel-light);
+}
+message-editor textarea,
+message-editor input[type="text"] {
+	background: transparent !important;
+	color: var(--stbar-bone) !important;
+	font-family: var(--stbar-font-body) !important;
+}
+message-editor textarea::placeholder { color: var(--stbar-ash) !important; }
+
+button {
+	background: var(--stbar-panel);
+	color: var(--stbar-bone);
+	border: 2px solid var(--stbar-panel-dark) !important;
+	box-shadow:
+		inset 3px 3px 0 0 var(--stbar-panel-light),
+		inset -3px -3px 0 0 var(--stbar-panel-dark);
+	font-family: var(--stbar-font-ui);
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+}
+button:hover { filter: brightness(1.15); color: var(--stbar-hellfire); }
+button:active {
+	box-shadow:
+		inset 3px 3px 0 0 var(--stbar-panel-dark),
+		inset -3px -3px 0 0 var(--stbar-panel-light);
+	transform: translate(1px, 1px);
+}
+button:focus-visible { outline: 2px dashed var(--stbar-key); outline-offset: 3px; }
+
+/* ============================================================
+   9. MARKDOWN CONTENT — tables, quotes, lists, hr
+   ============================================================ */
+table {
+	border-collapse: collapse;
+	background: var(--stbar-grate);
+	border: 2px solid var(--stbar-panel-dark);
+}
+th {
+	background: var(--stbar-panel);
+	color: var(--stbar-bone);
+	font-family: var(--stbar-font-ui);
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	text-align: left;
+	padding: 8px 12px;
+}
+td { padding: 8px 12px; border-bottom: 1px solid var(--stbar-panel-dark); }
+tr:hover td { background: rgba(181, 29, 14, 0.08); }
+blockquote {
+	border-left: 4px solid var(--stbar-blood);
+	color: var(--stbar-bone-dim);
+	padding-left: 12px;
+	margin-left: 0;
+}
+ul li::marker, ol li::marker { color: var(--stbar-hellfire); }
+hr {
+	border: 0;
+	height: 0;
+	border-top: 2px solid var(--stbar-panel-dark);
+	border-bottom: 2px solid var(--stbar-panel-light);
+}
+
+/* ============================================================
+   9b. HEADER TOPBAR + STATUS STRIP
+   ============================================================ */
+#stbar-header {
+	position: relative;
+	background: var(--stbar-panel) !important;
+	border-bottom: 2px solid var(--stbar-panel-dark) !important;
+	box-shadow:
+		inset 4px 4px 0 0 var(--stbar-panel-light),
+		inset -4px -4px 0 0 var(--stbar-panel-dark);
+}
+/* Logo block centered over the bar, independent of the flanking controls.
+   pointer-events:none so it never blocks clicks on items beneath it. */
+.stbar-logo-wrap {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	line-height: 1;
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	pointer-events: none;
+}
+.stbar-logo {
+	font-family: var(--stbar-font-display);
+	font-size: 22px;
+	color: var(--stbar-blood);
+	letter-spacing: 0.06em;
+	text-shadow: 0 2px 0 var(--stbar-blood-dark), 0 4px 8px #000;
+}
+.stbar-logo-sub {
+	font-family: var(--stbar-font-ui);
+	font-size: 11px;
+	color: var(--stbar-bone-dim);
+	text-transform: uppercase;
+	letter-spacing: 0.16em;
+	margin-top: 2px;
+}
+.stbar-status {
+	font-family: var(--stbar-font-ui);
+	font-size: 14px;
+	color: var(--stbar-bone);
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	white-space: nowrap;
+}
+.stbar-dot {
+	width: 9px;
+	height: 9px;
+	background: var(--stbar-marine);
+	box-shadow: 0 0 8px var(--stbar-marine);
+	display: inline-block;
+}
+.stbar-sep { color: var(--stbar-ash); }
+
+/* ============================================================
+   9c. HUD STATUS FOOTER — six recessed cells on a brown plate
+   ============================================================ */
+#stbar-hud {
+	display: grid;
+	grid-template-columns: repeat(6, 1fr);
+	gap: 8px;
+	padding: 8px 12px;
+	background: var(--stbar-panel);
+	border-top: 2px solid var(--stbar-panel-dark);
+	box-shadow:
+		inset 4px 4px 0 0 var(--stbar-panel-light),
+		inset -4px -4px 0 0 var(--stbar-panel-dark);
+}
+.stbar-hud-cell {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 3px;
+	padding: 4px 6px;
+	min-height: 48px;
+	background: var(--stbar-grate);
+	box-shadow:
+		inset 2px 2px 0 0 var(--stbar-panel-dark),
+		inset -2px -2px 0 0 var(--stbar-panel-light);
+	overflow: hidden;
+}
+.stbar-hud-label {
+	font-family: var(--stbar-font-ui);
+	font-size: 11px;
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+	color: var(--stbar-bone-dim);
+}
+.stbar-hud-value {
+	font-family: var(--stbar-font-hud);
+	font-size: 18px;
+	line-height: 1;
+	color: var(--stbar-marine);
+	text-shadow: 0 0 6px rgba(54, 163, 48, 0.4);
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.stbar-hud-value--sm { font-size: 12px; text-shadow: none; color: var(--stbar-bone); }
+
+/* ============================================================
+   11. AmazDooM @font-face — display logo face (local, from STBAR repo).
+   OFL/Google-Fonts faces (VT323, IBM Plex Mono, Press Start 2P,
+   Black Ops One) are loaded via @fontsource imports in main.ts.
+   ============================================================ */
+@font-face { font-family: "AmazDooMLeft"; src: url("/fonts/AmazDooMLeft.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "AmazDooMLeft2"; src: url("/fonts/AmazDooMLeft2.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "AmazDooMLeftOutline"; src: url("/fonts/AmazDooMLeftOutline.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "AmazDooMRight"; src: url("/fonts/AmazDooMRight.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "AmazDooMRight2"; src: url("/fonts/AmazDooMRight2.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "AmazDooMRightOutline"; src: url("/fonts/AmazDooMRightOutline.ttf") format("truetype"); font-display: swap; }
+
+/* ============================================================
+   12. POLISH — loader, tool status, dialogs, boot, reduced-motion
+   ============================================================ */
+
+/* Loader spinner → radar-yellow with glow (Lucide Loader + animate-spin) */
+.animate-spin {
+	color: var(--stbar-key) !important;
+	filter: drop-shadow(0 0 5px var(--stbar-key));
+}
+
+/* Tool status: success icons → marine-green (signal = healthy) */
+.text-green-600,
+.text-green-500,
+.text-green-400,
+.text-green-success {
+	color: var(--stbar-marine) !important;
+}
+
+/* Thinking-text shimmer → toxic-green scan tint */
+.animate-shimmer { color: var(--stbar-toxic) !important; }
+
+/* Dialog / overlay backdrop — darken + lean on the vignette */
+.fixed.inset-0 {
+	background: rgba(0, 0, 0, 0.66) !important;
+}
+
+/* Boot sequence (first-paint reveal) */
+#stbar-boot {
+	font-family: var(--stbar-font-body);
+	color: var(--stbar-toxic);
+	padding: 40px;
+	font-size: 15px;
+	line-height: 1.7;
+	white-space: pre;
+}
+#stbar-boot .stbar-boot-logo {
+	font-family: var(--stbar-font-display);
+	color: var(--stbar-blood);
+	font-size: 40px;
+	letter-spacing: 0.06em;
+	text-shadow: 0 3px 0 var(--stbar-blood-dark), 0 6px 12px #000;
+	margin-bottom: 16px;
+	display: block;
+}
+#stbar-boot .ok { color: var(--stbar-marine); }
+#stbar-boot .ts { color: var(--stbar-ash); }
+#stbar-boot .cursor {
+	color: var(--stbar-toxic);
+	animation: stbar-blink 1s step-end infinite;
+}
+@keyframes stbar-blink { 50% { opacity: 0; } }
+
+/* Respect reduced-motion — kill pulses, spins, sweeps, blinks */
+@media (prefers-reduced-motion: reduce) {
+	*, *::before, *::after {
+		animation-duration: 0.001ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.001ms !important;
+	}
+	.animate-spin { animation: none !important; }
+}
+
+/* ============================================================
+   13. THE BALLAD — lore overlay (easter egg)
+   ============================================================ */
+.stbar-ballad-backdrop {
+	position: fixed;
+	inset: 0;
+	z-index: 10000;
+	background: rgba(0, 0, 0, 0.82);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 32px;
+}
+.stbar-ballad-panel {
+	position: relative;
+	max-width: 680px;
+	max-height: 86vh;
+	overflow-y: auto;
+	padding: 36px 44px;
+	color: var(--stbar-bone);
+	background:
+		repeating-linear-gradient(0deg, #1f1a16 0 2px, transparent 2px 4px),
+		var(--stbar-stone);
+	border: 2px solid var(--stbar-panel-dark);
+	box-shadow:
+		inset 4px 4px 0 0 var(--stbar-panel-light),
+		inset -4px -4px 0 0 var(--stbar-panel-dark),
+		0 8px 40px rgba(0, 0, 0, 0.8);
+}
+.stbar-ballad-title {
+	font-family: var(--stbar-font-display);
+	font-size: 34px;
+	color: var(--stbar-blood);
+	text-shadow: 0 3px 0 var(--stbar-blood-dark), 0 6px 12px #000;
+	text-align: center;
+	letter-spacing: 0.04em;
+	margin: 0 0 22px;
+}
+.stbar-ballad-intro {
+	font-family: var(--stbar-font-body);
+	font-style: italic;
+	color: var(--stbar-bone-dim);
+	text-align: center;
+	line-height: 1.8;
+	margin-bottom: 24px;
+}
+.stbar-ballad-h {
+	font-family: var(--stbar-font-ui);
+	text-transform: uppercase;
+	letter-spacing: 0.16em;
+	color: var(--stbar-hellfire);
+	font-size: 18px;
+	margin: 26px 0 10px;
+	border-bottom: 2px solid var(--stbar-panel-dark);
+	padding-bottom: 4px;
+}
+.stbar-ballad-stanza { margin-bottom: 16px; line-height: 1.8; }
+.stbar-ballad-closing {
+	margin-top: 30px;
+	text-align: center;
+	font-family: var(--stbar-font-ui);
+	text-transform: uppercase;
+	letter-spacing: 0.12em;
+	font-size: 18px;
+	color: var(--stbar-blood-bright);
+	text-shadow: 0 0 8px var(--stbar-blood), 0 0 18px var(--stbar-blood-dark);
+}
+.stbar-ballad-close {
+	position: absolute;
+	top: 12px;
+	right: 12px;
+	width: 34px;
+	height: 34px;
+	line-height: 1;
+	font-size: 16px;
+}
+
+
+/* ============================================================
+   14. PER-MESSAGE COPY BUTTON (injected by main.ts)
+   ============================================================ */
+.stbar-copy-btn {
+	position: absolute;
+	top: 4px;
+	right: 42px;
+	z-index: 3;
+	font-family: var(--stbar-font-ui);
+	font-size: 10px;
+	letter-spacing: 0.14em;
+	line-height: 1.4;
+	padding: 0 6px !important;
+	color: var(--stbar-bone-dim);
+	background: var(--stbar-panel);
+	border: 1px solid var(--stbar-panel-dark) !important;
+	box-shadow: inset 1px 1px 0 0 var(--stbar-panel-light), inset -1px -1px 0 0 var(--stbar-panel-dark);
+	opacity: 0.55;
+	transition: opacity 0.1s, color 0.1s;
+	cursor: pointer;
+}
+.stbar-copy-btn:hover { opacity: 1; color: var(--stbar-hellfire); }

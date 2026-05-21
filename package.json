@@ -1,0 +1,30 @@
+{
+	"name": "pi-stbar",
+	"version": "0.1.0",
+	"description": "STBAR — a theme for pi (pi-coding-agent) inspired by id Software's DOOM (1993): brown beveled HUD plates, signal colors, monospaced type, sharp corners. Ships a 51-token terminal theme plus a web face built on pi-web-ui.",
+	"keywords": ["pi-package", "pi-theme", "stbar", "retro", "tui", "terminal-theme", "agent"],
+	"license": "MIT",
+	"author": "James Sesler (TheAmericanMaker)",
+	"homepage": "https://github.com/TheAmericanMaker/pi-stbar#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/TheAmericanMaker/pi-stbar.git"
+	},
+	"bugs": {
+		"url": "https://github.com/TheAmericanMaker/pi-stbar/issues"
+	},
+	"pi": {
+		"themes": ["./stbar.json"]
+	},
+	"files": [
+		"stbar.json",
+		"preview.html",
+		"preview.ts",
+		"README.md",
+		"FONTS.md",
+		"LICENSE"
+	],
+	"publishConfig": {
+		"access": "public"
+	}
+}

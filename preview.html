@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>pi · stbar theme preview</title>
+<style>
+  /* These values mirror the export block in stbar.json. */
+  :root {
+    --pi-void:        #0a0a0a;
+    --pi-stone:       #1a1715;
+    --pi-iron:        #2a2522;
+    --pi-grate:       #15110e;
+    --pi-panel:       #4a3a2a;
+    --pi-panel-light: #7a5e3c;
+    --pi-panel-dark:  #251a10;
+    --pi-bone:        #e8dcc4;
+    --pi-bone-dim:    #b8a886;
+    --pi-ash:         #6e655a;
+    --pi-healthy:     #36a330;
+    --pi-info:        #1e5fb8;
+    --pi-warning:     #f0c20c;
+    --pi-critical:    #e8341a;
+    --pi-accent:      #f96e1f;
+    --pi-console:     #7ad932;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--pi-void);
+    color: var(--pi-bone);
+    font-family: 'IBM Plex Mono', 'Courier New', ui-monospace, monospace;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  body {
+    background-image:
+      radial-gradient(circle at 20% 30%, #1a1614 0 1px, transparent 2px),
+      radial-gradient(circle at 70% 80%, #161210 0 1px, transparent 2px),
+      linear-gradient(180deg, #0a0a0a 0%, #120e0c 100%);
+    background-size: 7px 7px, 11px 11px, 100% 100%;
+    min-height: 100vh;
+    padding: 32px;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; }
+  /* Bevel: highlight top+left, shadow bottom+right. No rounded corners. */
+  .panel {
+    background: var(--pi-panel);
+    color: var(--pi-bone);
+    padding: 16px 20px;
+    border: 2px solid var(--pi-panel-dark);
+    box-shadow:
+      inset  4px  4px 0 0 var(--pi-panel-light),
+      inset -4px -4px 0 0 var(--pi-panel-dark),
+      0 6px 0 #000;
+    margin-bottom: 16px;
+  }
+  .card {
+    background: var(--pi-iron);
+    color: var(--pi-bone);
+    padding: 14px 18px;
+    border: 2px solid var(--pi-panel-dark);
+    box-shadow:
+      inset  3px  3px 0 0 #3a3530,
+      inset -3px -3px 0 0 var(--pi-panel-dark);
+    margin-bottom: 12px;
+  }
+  .header {
+    font-family: 'Black Ops One', 'Rubik Mono One', Impact, sans-serif;
+    color: var(--pi-critical);
+    letter-spacing: 0.04em;
+    text-shadow: 0 3px 0 #6b0d05, 0 6px 12px #000;
+    margin: 0 0 6px;
+    font-size: 28px;
+  }
+  .sub {
+    color: var(--pi-bone-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 11px;
+    margin: 0;
+  }
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    margin-right: 8px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    border: 1px solid var(--pi-panel-dark);
+    box-shadow: inset 0 0 0 1px var(--pi-panel-light);
+  }
+  .tag--ok       { background: #0a3a08; color: #c8f0c0; }
+  .tag--info     { background: #0a1f4a; color: #c4d8ff; }
+  .tag--warn     { background: #4a3a05; color: #fff0a8; }
+  .tag--critical { background: #5a0a05; color: #ffcfc6; }
+  .swatches { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+  .swatch {
+    background: var(--pi-grate);
+    padding: 10px 12px;
+    border: 1px solid var(--pi-panel-dark);
+    box-shadow: inset 2px 2px 0 0 var(--pi-panel-light), inset -2px -2px 0 0 var(--pi-panel-dark);
+  }
+  .swatch .dot {
+    display: inline-block; width: 14px; height: 14px;
+    border: 1px solid var(--pi-panel-dark);
+    box-shadow: inset 2px 2px 0 0 rgba(255,255,255,0.25), inset -2px -2px 0 0 rgba(0,0,0,0.45);
+    vertical-align: middle; margin-right: 8px;
+  }
+  .swatch code { color: var(--pi-bone-dim); font-size: 11px; }
+  .console { color: var(--pi-console); }
+  .accent  { color: var(--pi-accent); }
+  .dim     { color: var(--pi-ash); }
+  .crit    { color: var(--pi-critical); }
+  .ok      { color: var(--pi-healthy); }
+  .warn    { color: var(--pi-warning); }
+  .info    { color: var(--pi-info); }
+  pre.toolbox {
+    margin: 0; white-space: pre;
+    font-family: inherit; font-size: 13px;
+    padding: 10px 14px;
+    border: 2px solid var(--pi-panel-dark);
+    box-shadow: inset 3px 3px 0 0 #3a3530, inset -3px -3px 0 0 var(--pi-panel-dark);
+  }
+  .toolbox--ok    { background: #0e2a08; }
+  .toolbox--fail  { background: #2a0805; }
+  .toolbox--idle  { background: var(--pi-stone); }
+  /* scanlines, very subtle — keeps the CRT note from the design system */
+  body::after {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(to bottom,
+      transparent 0, transparent 2px,
+      rgba(0,0,0,0.18) 2px, rgba(0,0,0,0.18) 3px);
+    mix-blend-mode: multiply;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="panel">
+    <h1 class="header">PI · STBAR</h1>
+    <p class="sub">Theme preview · sharp corners · brown bevels · signal colors</p>
+  </div>
+
+  <div class="card">
+    <p class="dim" style="margin:0 0 8px; text-transform:uppercase; letter-spacing:0.16em; font-size:11px;">User message</p>
+    <p style="margin:0;">&gt; Refactor the cache layer and add tests.</p>
+  </div>
+
+  <div class="card">
+    <p class="dim" style="margin:0 0 8px; text-transform:uppercase; letter-spacing:0.16em; font-size:11px;">Assistant · markdown</p>
+    <p style="margin:0 0 6px;"><span class="accent">## Plan</span></p>
+    <p style="margin:0;">Read <span class="console">src/cache.ts</span>, extract <span class="console">invalidate()</span>, then update <a style="color:var(--pi-info); text-decoration:none; border-bottom:1px dotted var(--pi-info);">docs/cache.md</a>.</p>
+  </div>
+
+  <pre class="toolbox toolbox--ok"><span class="ok">✓ read</span>   src/cache.ts                              42 lines
+<span class="dim">+ export function invalidate(key: string) { ... }</span></pre>
+  <div style="height:10px"></div>
+  <pre class="toolbox toolbox--fail"><span class="crit">✗ bash</span>   npm test                                exit 1
+<span class="dim">FAIL  cache.test.ts  ›  invalidate clears entries</span></pre>
+  <div style="height:10px"></div>
+  <pre class="toolbox toolbox--idle"><span class="dim">… bash</span>   running build…</pre>
+
+  <div style="margin:18px 0">
+    <span class="tag tag--ok">healthy</span>
+    <span class="tag tag--info">info</span>
+    <span class="tag tag--warn">warning</span>
+    <span class="tag tag--critical">critical</span>
+  </div>
+
+  <p class="sub" style="margin-bottom:6px">Palette</p>
+  <div class="swatches">
+    <div class="swatch"><span class="dot" style="background:#36a330"></span><strong class="ok">healthy</strong><br><code>#36a330</code></div>
+    <div class="swatch"><span class="dot" style="background:#1e5fb8"></span><strong class="info">info</strong><br><code>#1e5fb8</code></div>
+    <div class="swatch"><span class="dot" style="background:#f0c20c"></span><strong class="warn">warning</strong><br><code>#f0c20c</code></div>
+    <div class="swatch"><span class="dot" style="background:#e8341a"></span><strong class="crit">critical</strong><br><code>#e8341a</code></div>
+    <div class="swatch"><span class="dot" style="background:#f96e1f"></span><strong class="accent">accent</strong><br><code>#f96e1f</code></div>
+    <div class="swatch"><span class="dot" style="background:#7ad932"></span><strong class="console">console</strong><br><code>#7ad932</code></div>
+    <div class="swatch"><span class="dot" style="background:#4a3a2a"></span><strong>panel</strong><br><code>#4a3a2a</code></div>
+    <div class="swatch"><span class="dot" style="background:#7a5e3c"></span><strong>panel-light</strong><br><code>#7a5e3c</code></div>
+    <div class="swatch"><span class="dot" style="background:#251a10"></span><strong>panel-dark</strong><br><code>#251a10</code></div>
+    <div class="swatch"><span class="dot" style="background:#e8dcc4"></span><strong>bone</strong><br><code>#e8dcc4</code></div>
+  </div>
+
+  <p class="dim" style="margin-top:24px; font-size:12px;">STBAR-inspired · 1993 · UAC monitor, 2145</p>
+
+</div>
+</body>
+</html>
