@@ -2,12 +2,16 @@
 
 **STBAR** — a theme for [pi](https://pi.dev) (the `pi-coding-agent`) inspired by
 id Software's *DOOM* (1993). Brown beveled HUD plates, signal colors, monospaced
-type, and sharp corners — everywhere, always. It ships in two faces:
+type, and sharp corners — everywhere, always. It ships in three faces:
 
 - **Terminal theme** — `stbar.json`, a 51-token color theme for pi's TUI.
 - **Web face** — a browser app built on [`@earendil-works/pi-web-ui`](https://www.npmjs.com/package/@earendil-works/pi-web-ui),
   skinned with the full STBAR look: scanlines, vignette, beveled message plates,
-  a six-cell status HUD, a UAC-style boot sequence, and the AmazDooM logo.
+  a six-cell status HUD, a UAC-style boot sequence, and the AmazDooM logo. In
+  Chrome/Edge the agent can read/write/edit files in a folder you grant.
+- **Desktop face** — the same app wrapped in [Tauri](https://tauri.app), trading
+  the browser sandbox for **full native filesystem access and a real shell**
+  (`bash`, `git`, builds) — terminal-pi power behind the STBAR glass.
 
 > **Not affiliated with or endorsed by id Software, ZeniMax Media, Bethesda, or
 > Microsoft.** *DOOM* is a registered trademark of ZeniMax Media Inc. This is an
@@ -65,6 +69,22 @@ can chat, run JavaScript, render artifacts, and — in Chrome/Edge — read/writ
 files in a folder you grant. See [`web/README.md`](web/README.md) for details,
 browser support, and the Ollama notes.
 
+## Run — desktop face
+
+Same frontend, wrapped in Tauri, with native filesystem + shell tools instead of
+the browser sandbox. Needs the [Rust toolchain](https://rustup.rs) and Tauri's
+system dependencies (see [`desktop/README.md`](desktop/README.md)).
+
+```bash
+cd web && npm install        # frontend deps (incl. @tauri-apps/api)
+cd ../desktop && npm install # the Tauri CLI
+npm run dev                  # builds + launches the native app
+```
+
+`npm run dev` starts the web dev server itself and opens the native window. The
+first run compiles the Rust crates and takes a few minutes; later runs are fast.
+`npm run build` writes installers to `desktop/src-tauri/target/release/bundle/`.
+
 ## What's inside
 
 | Path | What it is |
@@ -73,6 +93,7 @@ browser support, and the Ollama notes.
 | `preview.html` | Static CSS preview of the palette + components. |
 | `preview.ts` | Terminal preview (`npx tsx preview.ts`). |
 | `web/` | The web face — Vite + Lit + Tailwind, on `pi-web-ui`. |
+| `desktop/` | The desktop face — Tauri v2 wrapper (native FS + shell). |
 | `FONTS.md` | Font delivery + licenses. |
 | `PLANNING.md`, `STYLING-CHECKLIST.md` | Design + status notes. |
 
