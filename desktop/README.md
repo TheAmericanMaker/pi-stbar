@@ -66,6 +66,22 @@ Same as the web face: open the settings cog, add an API key for your provider
 content security policy is disabled (`csp: null` in `tauri.conf.json`) so the
 agent can reach arbitrary provider endpoints, including localhost.
 
+## Providers & Ollama (no CORS setup needed)
+
+Provider requests — local Ollama and cloud APIs alike — are routed through the
+native HTTP client in Rust, not the webview. Because the request is made
+server-side, there's no browser origin and CORS never applies. So **local Ollama
+works out of the box**: no `OLLAMA_ORIGINS`, no CORS proxy, no flags.
+
+(Local Ollama needs no API key either — pi treats it as an auto-discovery
+provider and ignores the key field for local models. A key is only used for genuine
+cloud APIs and Ollama's authenticated `:cloud` models.)
+
+This bridge lives in `../web/src/tauri-tools.ts` (`installTauriFetch`) and only
+activates inside the desktop app, for cross-origin requests; same-origin traffic
+(app assets, dev HMR) uses the normal browser fetch. It's backed by
+`tauri-plugin-http`, scoped in `src-tauri/capabilities/default.json`.
+
 ## Notes
 
 - **Icons** are placeholders (a beveled STBAR panel with a `π` glyph). Replace

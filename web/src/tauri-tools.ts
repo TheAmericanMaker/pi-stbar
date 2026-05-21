@@ -29,6 +29,44 @@ async function invoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T
 	return core.invoke<T>(cmd, args);
 }
 
+// ------------------------------------------------------------
+// CORS bypass: route cross-origin requests (LLM providers, local
+// Ollama) through Tauri's native HTTP client instead of the webview.
+//
+// In the packaged app the webview origin is `http://tauri.localhost`,
+// which Ollama and some cloud providers reject (CORS / OLLAMA_ORIGINS).
+// The native HTTP client makes the request server-side from Rust — no
+// browser origin, no CORS — so providers work with zero user setup.
+//
+// We only patch fetch under Tauri, and only for cross-origin http(s)
+// URLs; same-origin traffic (app assets, Vite HMR) keeps the native
+// fetch untouched. Streaming responses are preserved by the plugin.
+// ------------------------------------------------------------
+export async function installTauriFetch(): Promise<void> {
+	if (!isTauri()) return;
+	if ((window as any).__stbarFetchPatched) return;
+	try {
+		const http = await import("@tauri-apps/plugin-http");
+		const tauriFetch = http.fetch;
+		const nativeFetch = window.fetch.bind(window);
+		window.fetch = ((input: any, init?: any) => {
+			try {
+				const url = typeof input === "string" ? input : (input?.url ?? String(input));
+				if (/^https?:\/\//i.test(url) && new URL(url).origin !== window.location.origin) {
+					return tauriFetch(input, init);
+				}
+			} catch {
+				// fall through to native fetch on any parse error
+			}
+			return nativeFetch(input, init);
+		}) as typeof window.fetch;
+		(window as any).__stbarFetchPatched = true;
+	} catch (err) {
+		// Plugin missing or failed to load: leave native fetch in place.
+		console.warn("[stbar] native fetch bridge unavailable; falling back to browser fetch", err);
+	}
+}
+
 let workspaceRoot = "";
 let workspaceName = "";
 

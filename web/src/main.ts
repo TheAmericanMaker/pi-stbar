@@ -46,6 +46,7 @@ import {
 	getTauriWorkspaceName,
 	hasTauriWorkspace,
 	initTauriWorkspace,
+	installTauriFetch,
 	isTauri,
 	pickTauriFolder,
 } from "./tauri-tools.js";
@@ -761,6 +762,7 @@ async function initApp() {
 	const app = document.getElementById("app");
 	if (!app) throw new Error("App container not found");
 
+	await installTauriFetch();
 	await initTauriWorkspace();
 
 	await runBootSequence();
